@@ -82,7 +82,12 @@ const Friends = ({ userProfile, onLogout, onNavigate }) => {
             addressee_id: toUserId,
             status: 'pending',
         });
-        if (!error) setSentMap(p => ({ ...p, [toUserId]: true }));
+        if (error) {
+            console.error("Friend request failed:", error);
+            alert("Could not send request: " + error.message);
+        } else {
+            setSentMap(p => ({ ...p, [toUserId]: true }));
+        }
     };
 
     const accept = async (id) => { await supabase.from('friendships').update({ status: 'accepted' }).eq('id', id); fetchFriends(); fetchRequests(); };
@@ -148,6 +153,9 @@ const Friends = ({ userProfile, onLogout, onNavigate }) => {
                     </button>
                     <button className={`fl-tab ${activeTab === 'requests' ? 'fl-tab-on' : ''}`} onClick={() => { setActiveTab('requests'); setChatFriend(null); }}>
                         Requests {requestCount > 0 && <span className="fl-tab-badge">{requestCount}</span>}
+                    </button>
+                    <button className={`fl-tab ${activeTab === 'discover' ? 'fl-tab-on' : ''}`} onClick={() => { setActiveTab('discover'); setChatFriend(null); }}>
+                        Add People
                     </button>
                 </div>
 
@@ -228,6 +236,47 @@ const Friends = ({ userProfile, onLogout, onNavigate }) => {
                                 <p>No pending requests</p>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Discover list (Inside panel for mobile) */}
+                {activeTab === 'discover' && (
+                    <div className="fl-list">
+                        <div className="fl-search-wrap" style={{ margin: '8px 4px 12px' }}>
+                            <Search size={15} className="fl-search-icon" />
+                            <input
+                                className="fl-search-input"
+                                type="text"
+                                placeholder="Search by name…"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        {filtered.length === 0 ? (
+                            <div className="fl-empty">
+                                <Search size={40} strokeWidth={1} />
+                                <p>No users found</p>
+                            </div>
+                        ) : filtered.map((user, i) => (
+                            <div key={user.id} className="fl-discover-item">
+                                <div className="fl-d-avatar" style={{ backgroundColor: COLORS[i % COLORS.length] }}>
+                                    {user.full_name?.[0] || 'U'}
+                                </div>
+                                <div className="fl-d-info">
+                                    <span className="fl-d-name">{user.full_name || 'User'}</span>
+                                    <span className="fl-d-handle">@{user.nickname || 'user'}</span>
+                                </div>
+                                <button
+                                    className={`fl-d-btn ${sentMap[user.id] ? 'fl-d-sent' : ''}`}
+                                    onClick={() => sendRequest(user.id)}
+                                    disabled={sentMap[user.id]}
+                                >
+                                    {sentMap[user.id]
+                                        ? <><CheckCircle size={13} /> Sent</>
+                                        : <><UserPlus size={13} /> Add</>}
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
