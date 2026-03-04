@@ -1,0 +1,76 @@
+.splash-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    /* White background */
+    z-index: 9999;
+}
+
+.splash-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.loading-squares {
+    display: grid;
+    grid-template-columns: repeat(2, 12px);
+    grid-template-rows: repeat(2, 12px);
+    gap: 4px;
+}
+
+.square {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    animation: square-pulse 1.5s infinite ease-in-out;
+}
+
+.s1 {
+    background-color: #0d1b3e;
+    /* Navy for light bg */
+    grid-area: 1 / 1;
+    animation-delay: 0s;
+}
+
+.s2 {
+    background-color: #d1d5db;
+    /* Gray */
+    grid-area: 1 / 2;
+    animation-delay: 0.2s;
+}
+
+.s3 {
+    background-color: #d1d5db;
+    /* Gray */
+    grid-area: 2 / 1;
+    animation-delay: 0.4s;
+}
+
+.splash-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #0d1b3e;
+    /* Navy text */
+    margin: 0;
+    letter-spacing: -0.01em;
+    padding-left: 8px;
+}
+
+@keyframes square-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(0.9);
+    }
+}

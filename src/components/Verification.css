@@ -1,0 +1,52 @@
+.verification-card {
+    max-width: 440px;
+    /* Slightly wider for 8 boxes */
+}
+
+.verification-text {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.otp-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    /* Reduced gap for 8 boxes */
+    margin-bottom: 24px;
+}
+
+.otp-input {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 18px;
+    /* Slightly smaller font */
+    font-weight: 700;
+    color: #1a1e2b;
+    outline: none;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+}
+
+.otp-input:focus {
+    border-color: #061C21;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(6, 28, 33, 0.05);
+}
+
+@media (max-width: 480px) {
+    .otp-container {
+        gap: 4px;
+    }
+
+    .otp-input {
+        height: 40px;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+}
