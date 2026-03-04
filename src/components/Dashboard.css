@@ -1891,18 +1891,40 @@
     }
 }
 
+/* ==========================================
+   RESPONSIVE (TABLET & MOBILE)
+   ========================================== */
+
+/* 1. Tablet (Small Laptops / Horizontal Tablets) */
+@media (max-width: 1200px) {
+    .dash-wrapper {
+        grid-template-columns: 240px 1fr 300px;
+    }
+
+    .friends-layout {
+        grid-template-columns: 240px 280px 1fr 280px;
+    }
+}
+
+/* 2. Small Tablet (Standard Portrait) */
 @media (max-width: 1024px) {
     .dash-wrapper {
-        grid-template-columns: 70px 1fr 280px;
+        grid-template-columns: 80px 1fr 280px;
+    }
+
+    .friends-layout {
+        grid-template-columns: 80px 260px 1fr 260px;
     }
 
     .friends-page.dash-wrapper {
-        grid-template-columns: 70px 60px 1fr 240px;
+        grid-template-columns: 80px 60px 1fr 240px;
     }
 
     .sidebar-brand-name,
-    .nav-item>span:not(.badge) {
-        display: none;
+    .nav-item>span:not(.badge),
+    .sidebar-user .user-info,
+    .sidebar-brand span:not(.logo-grid) {
+        display: none !important;
     }
 
     .nav-item {
@@ -1912,12 +1934,151 @@
 
     .sidebar-brand {
         justify-content: center;
+        padding-left: 0;
+        margin-bottom: 30px;
+    }
+
+    .sidebar-user {
+        justify-content: center;
+        padding: 12px;
+    }
+
+    .logout-icon-mini {
+        display: none !important;
+    }
+}
+
+/* 3. Phablet (Hide right panel to focus on content) */
+@media (max-width: 850px) {
+    .dash-wrapper {
+        grid-template-columns: 80px 1fr;
+    }
+
+    .dash-right {
+        display: none;
+    }
+
+    .friends-layout {
+        grid-template-columns: 80px 280px 1fr;
+    }
+
+    .fl-discover {
+        display: none;
+    }
+}
+
+/* 4. Large Mobile (Stacked layouts) */
+@media (max-width: 650px) {
+    .friends-layout {
+        grid-template-columns: 80px 1fr;
+    }
+
+    /* Hide friend list panel, show only chat or list depending on state if we had a mobile toggle */
+    /* For now, just shrink panels */
+    .fl-panel {
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        height: 100%;
+    }
+
+    .fl-panel[style*="display: none"] {
+        display: none;
+    }
+}
+
+/* 5. Mobile (Single Column / Bottom Nav) */
+@media (max-width: 500px) {
+
+    .dash-wrapper,
+    .friends-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 70px;
+        height: 100vh;
+    }
+
+    /* Sidebars become bottom navs */
+    .dash-sidebar {
+        grid-row: 2;
+        flex-direction: row;
+        padding: 0;
+        border-right: none;
+        border-top: 1px solid #f1f5f9;
+        height: 70px;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .sidebar-brand,
+    .sidebar-user {
+        display: none !important;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        gap: 0;
+    }
+
+    .nav-item {
+        height: 100%;
+        border-radius: 0;
+        flex: 1;
         padding: 0;
     }
 
-    .sidebar-user .user-info,
-    .logout-icon-mini {
-        display: none;
+    .nav-item.active {
+        background: transparent;
+        color: #0d1b3e;
+        border-top: 3px solid #0d1b3e;
+    }
+
+    .nav-item.active .nav-icon {
+        color: #0d1b3e;
+    }
+
+    /* Main areas take full screen */
+    .dash-main,
+    .fl-main,
+    .fl-panel {
+        padding: 16px;
+        height: calc(100vh - 70px);
+    }
+
+    .dash-main {
+        padding: 16px 12px;
+    }
+
+    .friends-strip-horizontal {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .plans-section {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .day-strip {
+        padding: 8px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .day-num {
+        font-size: 16px;
+    }
+
+    /* Modals for mobile */
+    .modal-box {
+        width: 95% !important;
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr !important;
     }
 }
 
