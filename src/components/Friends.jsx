@@ -35,6 +35,14 @@ const Friends = ({ userProfile, onLogout, onNavigate }) => {
         }
     }, [userProfile]);
 
+    // Server-side debounced search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (userProfile?.id) fetchDiscover(searchQuery);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [searchQuery, userProfile?.id]);
+
     const fetchFriends = async () => {
         const { data } = await supabase
             .from('friendships')
@@ -54,39 +62,57 @@ const Friends = ({ userProfile, onLogout, onNavigate }) => {
     };
 
     const fetchRequests = async () => {
-        const { data: inc } = await supabase
+        // Try to fetch incoming requests. Using explicit join if named FK fails
+        const { data: inc, error: incErr } = await supabase
             .from('friendships')
-            .select('id, requester:profiles!friendships_requester_id_fkey(id, full_name, nickname)')
+            .select('id, requester:requester_id(id, full_name, nickname)')
             .eq('addressee_id', userProfile.id).eq('status', 'pending');
+
         if (inc) setPendingIn(inc);
 
-        const { data: out } = await supabase
+        // Try to fetch outgoing requests
+        const { data: out, error: outErr } = await supabase
             .from('friendships')
-            .select('id, addressee:profiles!friendships_addressee_id_fkey(id, full_name, nickname)')
+            .select('id, addressee:addressee_id(id, full_name, nickname)')
             .eq('requester_id', userProfile.id).eq('status', 'pending');
+
         if (out) setPendingOut(out);
+
+        if (incErr || outErr) console.warn("Request fetch error:", incErr || outErr);
     };
 
-    const fetchDiscover = async () => {
-        const { data } = await supabase
-            .from('profiles')
-            .select('id, full_name, nickname')
-            .neq('id', userProfile.id)
-            .limit(30);
+    const fetchDiscover = async (query = '') => {
+        let rpc = supabase.from('profiles').select('id, full_name, nickname').neq('id', userProfile.id);
+
+        if (query) {
+            rpc = rpc.or(`full_name.ilike.%${query}%,nickname.ilike.%${query}%`);
+        }
+
+        const { data } = await rpc.limit(30);
         if (data) setDiscoverUsers(data);
     };
 
     const sendRequest = async (toUserId) => {
-        const { error } = await supabase.from('friendships').insert({
+        // Use UPSERT to handle existing 'declined' or 'pending' requests gracefully
+        const { error } = await supabase.from('friendships').upsert({
             requester_id: userProfile.id,
             addressee_id: toUserId,
             status: 'pending',
-        });
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'requester_id,addressee_id' });
+
         if (error) {
-            console.error("Friend request failed:", error);
-            alert("Could not send request: " + error.message);
+            // If upsert fails due to policy or other reason, show friendly msg
+            if (error.code === '23505') {
+                alert("A request already exists between you and this user.");
+                setSentMap(p => ({ ...p, [toUserId]: true }));
+            } else {
+                console.error("Friend request failed:", error);
+                alert("Could not send request: " + error.message);
+            }
         } else {
             setSentMap(p => ({ ...p, [toUserId]: true }));
+            fetchRequests(); // Sync UI
         }
     };
 
@@ -97,9 +123,7 @@ const Friends = ({ userProfile, onLogout, onNavigate }) => {
         if (myFriends.some(f => f?.id === u.id)) return false;
         if (pendingOut.some(p => p.addressee?.id === u.id) || sentMap[u.id]) return false;
         if (pendingIn.some(p => p.requester?.id === u.id)) return false;
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return u.full_name?.toLowerCase().includes(q) || u.nickname?.toLowerCase().includes(q);
+        return true;
     });
 
     const requestCount = pendingIn.length;
